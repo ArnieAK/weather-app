@@ -19,6 +19,9 @@ export const els = {
   favBtn: $('#fav-btn'),
   forecast: $('#forecast'),
   forecastList: $('#forecast-list'),
+  news: $('#news'),
+  newsSubtitle: $('#news-subtitle'),
+  newsBody: $('#news-body'),
 };
 
 /** Small helper to build an element: el('li', { class: 'x', text: 'hi' }, [children]) */
@@ -227,4 +230,104 @@ function renderForecast(daily) {
 
   els.forecast.hidden = false;
   els.forecastList.replaceChildren(...days);
+}
+
+/* ---------- Local news ---------- */
+
+const relativeTime = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+// Date -> "3 hours ago", "yesterday", "4 days ago"
+function timeAgo(date) {
+  if (!date) return '';
+  const minutes = Math.round((date.getTime() - Date.now()) / 60000);
+  if (minutes > -60) return relativeTime.format(Math.min(minutes, -1), 'minute');
+  const hours = Math.round(minutes / 60);
+  if (hours > -24) return relativeTime.format(hours, 'hour');
+  return relativeTime.format(Math.round(hours / 24), 'day');
+}
+
+let slowNewsTimer = null;
+
+function showNews(subtitle, ...content) {
+  clearTimeout(slowNewsTimer);
+  els.news.hidden = false;
+  els.newsSubtitle.textContent = subtitle;
+  els.newsBody.replaceChildren(...content);
+}
+
+// A backup that always works: a link to Google News for the same place.
+function googleNewsLink(city) {
+  return el('a', {
+    class: 'news-fallback',
+    href: `https://news.google.com/search?q=${encodeURIComponent(city.name)}`,
+    target: '_blank',
+    rel: 'noopener noreferrer',
+    text: `Search Google News for ${city.name} →`,
+  });
+}
+
+export function showNewsLoading(city) {
+  const text = el('span', { text: 'Loading local news…' });
+  showNews(
+    `Headlines mentioning ${city.name}`,
+    el('p', { class: 'news-message' }, [el('span', { class: 'spinner', 'aria-hidden': 'true' }), text]),
+  );
+  slowNewsTimer = setTimeout(() => {
+    text.textContent = 'Still loading the news…';
+  }, 5000);
+}
+
+/** A plain message, plus the Google News link when there's a city to search for. */
+export function showNewsMessage(subtitle, message, city = null) {
+  const content = [el('p', { class: 'news-message', text: message })];
+  if (city) content.push(googleNewsLink(city));
+  showNews(subtitle, ...content);
+}
+
+export function showNewsError(city, message, onRetry) {
+  const retry = el('button', { type: 'button', class: 'retry-btn', text: 'Try again' });
+  retry.addEventListener('click', onRetry);
+  showNews(
+    `Headlines mentioning ${city.name}`,
+    el('p', { class: 'news-message is-error' }, [el('span', { text: message }), retry]),
+    googleNewsLink(city),
+  );
+}
+
+export function renderNews(city, articles) {
+  const subtitle = `Headlines mentioning ${city.name}`;
+  if (!articles.length) {
+    showNewsMessage(subtitle, `No recent English-language news mentioning ${city.name}.`, city);
+    return;
+  }
+
+  const items = articles.map((article) => {
+    const meta = [article.source, timeAgo(article.time)].filter(Boolean).join(' · ');
+    const children = [];
+
+    if (article.image) {
+      const img = el('img', {
+        class: 'article-thumb',
+        src: article.image,
+        alt: '',
+        loading: 'lazy',
+        referrerpolicy: 'no-referrer',
+        width: 72,
+        height: 72,
+      });
+      // Many news images block other sites from showing them; drop any that fail.
+      img.addEventListener('error', () => img.remove());
+      children.push(img);
+    }
+    children.push(el('span', { class: 'article-text' }, [
+      el('span', { class: 'article-title', text: article.title }),
+      el('span', { class: 'article-meta', text: meta }),
+    ]));
+
+    return el('li', { class: 'article' }, [
+      el('a', { class: 'article-link', href: article.url, target: '_blank', rel: 'noopener noreferrer' }, children),
+    ]);
+  });
+
+  showNews(subtitle, el('ul', { class: 'article-list' }, items));
 }

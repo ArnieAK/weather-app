@@ -1,0 +1,5 @@
+# Local secrets for testing the Worker with `npx wrangler dev`. Never commit these.
+worker/.dev.vars
+.wrangler/
+node_modules/
+.DS_Store

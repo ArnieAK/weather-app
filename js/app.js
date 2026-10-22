@@ -1,6 +1,7 @@
 // Entry point: holds the app state and wires up all the event listeners.
 
 import { searchCities, getForecast } from './api.js';
+import { getLocalNews, isNewsSetUp, NewsError } from './news.js';
 import * as store from './storage.js';
 import * as ui from './ui.js';
 
@@ -16,6 +17,8 @@ const state = {
 let debounceTimer = null;
 let searchController = null; // lets us cancel an older search when the user keeps typing
 let loadCount = 0; // used to ignore slow responses for a city the user has moved away from
+let newsController = null; // cancels news for a city the user has moved away from
+let newsCityId = null; // the city the news section is showing (or loading)
 
 /* ---------- Loading weather ---------- */
 
@@ -34,6 +37,7 @@ async function loadCity(city, unit = state.unit) {
     ui.clearStatus();
     store.setLastCity(city);
     refreshFavourites();
+    loadNews(city);
   } catch (err) {
     if (thisLoad !== loadCount) return;
     console.error(err);
@@ -41,6 +45,46 @@ async function loadCity(city, unit = state.unit) {
       ? `Couldn't load the weather for ${city.name}.`
       : 'You seem to be offline. Check your connection.';
     ui.showError(message, () => loadCity(city, unit));
+  }
+}
+
+/* ---------- Local news ---------- */
+
+// News loads after the weather, and never blocks it: if news fails, the weather still shows.
+async function loadNews(city, { retry = false } = {}) {
+  // Switching °C/°F reloads the weather for the same city; the news doesn't need reloading.
+  if (city.id === newsCityId && !retry) return;
+  newsController?.abort();
+  newsCityId = city.id;
+
+  if (!isNewsSetUp()) {
+    ui.showNewsMessage(
+      `Headlines mentioning ${city.name}`,
+      'Local news isn\'t set up yet: add your news proxy address in js/config.js (see the README).',
+      city,
+    );
+    return;
+  }
+
+  // "My location" has no place name to search the news for.
+  if (city.id.startsWith('loc:')) {
+    ui.showNewsMessage('Headlines for your area', 'Local news needs a place name. Search for a city to see its headlines.');
+    return;
+  }
+
+  const controller = new AbortController();
+  newsController = controller;
+  ui.showNewsLoading(city);
+
+  try {
+    const articles = await getLocalNews(city, controller.signal);
+    if (controller.signal.aborted) return;
+    ui.renderNews(city, articles);
+  } catch (err) {
+    if (controller.signal.aborted || err.name === 'AbortError') return;
+    console.error(err);
+    const message = err instanceof NewsError ? err.message : "Couldn't load the news.";
+    ui.showNewsError(city, message, () => loadNews(city, { retry: true }));
   }
 }
 

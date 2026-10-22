@@ -1,0 +1,4 @@
+# Only needed if you deploy with the command line (npx wrangler deploy) instead of the dashboard.
+name = "weather-news"
+main = "news-proxy.js"
+compatibility_date = "2025-01-01"

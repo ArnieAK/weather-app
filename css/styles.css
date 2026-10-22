@@ -514,6 +514,70 @@ main.container {
   background: var(--range);
 }
 
+/* ---------- Local news ---------- */
+
+.news { padding: 16px 20px 12px; }
+
+.news-head { margin-bottom: 4px; }
+.news-head .section-title { margin-bottom: 0; }
+.news-subtitle { font-size: 0.85rem; color: var(--muted); }
+
+.news-message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  color: var(--muted);
+}
+
+.news-message.is-error { color: var(--danger); }
+
+.news-fallback {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.article { border-top: 1px solid var(--border); }
+.article:first-child { border-top: 0; }
+
+.article-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.article-link:hover .article-title { color: var(--accent); text-decoration: underline; }
+
+.article-thumb {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.article-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+.article-title {
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  /* Keep very long headlines to three lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-meta { font-size: 0.8rem; color: var(--muted); overflow-wrap: anywhere; }
+
 /* ---------- Footer ---------- */
 
 .app-footer {
@@ -576,6 +640,19 @@ main.container {
 
   .day-min { text-align: center; }
   .range { display: none; }
+
+  /* News: two columns of headlines */
+  .news { padding: 20px 24px 16px; }
+  .news-head { margin-bottom: 8px; }
+
+  .article-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 32px;
+  }
+
+  /* The first headline in each column has no divider above it */
+  .article:nth-child(2) { border-top: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

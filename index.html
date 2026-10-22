@@ -94,12 +94,21 @@
       <h2 id="forecast-title" class="section-title">7-day forecast</h2>
       <ol id="forecast-list" class="forecast-list"></ol>
     </section>
+
+    <section id="news" class="card news" aria-labelledby="news-title" hidden>
+      <div class="news-head">
+        <h2 id="news-title" class="section-title">Local news</h2>
+        <p id="news-subtitle" class="news-subtitle"></p>
+      </div>
+      <div id="news-body" class="news-body" aria-live="polite"></div>
+    </section>
   </main>
 
   <footer class="app-footer">
     <div class="container">
       Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
-      (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)
+      (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>).
+      News from <a href="https://gnews.io/" target="_blank" rel="noopener">GNews</a>.
     </div>
   </footer>
 </body>
