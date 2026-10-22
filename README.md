@@ -1,3 +1,22 @@
+A weather app that feature local news of searched areas. Made by Claude Code as part of a school assignment. It has the following features:
+- 7 Day forecast
+- Search area, city or country
+- Share your location and check local weather
+- add to and remove from favorites
+- Switch between celsius and fahrenheit (wind speed also switches from km/h to mph)
+- 8 recent news articles mentioning the city that is being checked
+
+The following error-handling is also implemented:
+- Errors relating to shared locations, with fitting messages
+- No search matches
+- Errors relating to faults with the weather API, with fitting messages
+- Errors relating to fault with the news API, with fitting messages
+
+The YouTube video showcases most of these features and error-handlings
+The news API required its own proxy server to run, the current link in config.js only works for my local pc. Steps to create your own server, to activate the
+API are below. 
+YouTube link: https://youtu.be/0q6BNg6Wn6M
+
 # Weather
 
 A simple weather website built with plain HTML, CSS and JavaScript. There is no build step and nothing to install.
