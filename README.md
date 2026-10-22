@@ -1,3 +1,5 @@
+An assignment where I prompt an AI LLM to create an app of my choice. Created solely by Claude Code
+
 # Weather
 
 A simple weather website built with plain HTML, CSS and JavaScript. There is no build step and nothing to install.
